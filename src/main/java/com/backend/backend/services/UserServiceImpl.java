@@ -100,4 +100,10 @@ public class UserServiceImpl implements UserService {
   public Optional<User> getUserById(Long id) {
     return userRepository.getUserById(id);
   }
+
+  @Override
+  @Transactional
+  public void removeUser(Long id) {
+    userRepository.eliminarUsuario(id);
+  }
 }

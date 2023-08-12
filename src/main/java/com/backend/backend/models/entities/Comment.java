@@ -31,7 +31,7 @@ public class Comment implements Serializable {
   @NotEmpty
   private String content;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @ManyToOne
   private Post post;
   
   @NotNull
@@ -40,7 +40,7 @@ public class Comment implements Serializable {
   @DateTimeFormat(pattern = "yyyy-MM-dd")
   private Date createdAt;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @ManyToOne
   private User users;
 
   @PrePersist

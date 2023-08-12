@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +17,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 
@@ -36,16 +42,24 @@ public class User implements IUser {
   private String address;
   private String password;
 
+  @Column(name = "created_at")
+  @Temporal(TemporalType.TIMESTAMP)
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
+  private Date createAt;
+
+  @Column(name = "is_active")
+  private Integer isActive;
+
   @Transient
   private Boolean admin;
 
-  @OneToMany(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+  @OneToMany
   private List<Comment> comments;
 
-  @OneToMany(mappedBy = "user" , fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToMany
   private List<Post> posts;
 
-  @ManyToMany(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(
     name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"),
@@ -53,6 +67,12 @@ public class User implements IUser {
     uniqueConstraints = { @UniqueConstraint(columnNames = { "user_id", "role_id"})}
   )
   private List<Role> roles;
+  
+  @PrePersist
+  private void prePersist(){
+    createAt = new Date();
+    isActive = 0;
+  }
 
   public User() {
     posts = new ArrayList<Post>();
@@ -154,5 +174,23 @@ public class User implements IUser {
   public void setComments(List<Comment> comments) {
     this.comments = comments;
   }
+
+  public Date getCreateAt() {
+    return createAt;
+  }
+
+  public void setCreateAt(Date createAt) {
+    this.createAt = createAt;
+  }
+
+  public Integer getIsActive() {
+    return isActive;
+  }
+
+  public void setIsActive(Integer isActive) {
+    this.isActive = isActive;
+  }
+
+  
 
 }

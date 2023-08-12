@@ -18,4 +18,7 @@ public interface UserService {
   Optional<UserDto> findById(Long id);
 
   Optional<User> getUserById(Long id);
+
+  void removeUser(Long id);
+
 }

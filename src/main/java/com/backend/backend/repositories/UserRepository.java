@@ -2,6 +2,7 @@ package com.backend.backend.repositories;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -16,5 +17,9 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
   @Query("SELECT u FROM User u WHERE u.id = ?1")
   Optional<User> getUserById(Long id);
+  
+  @Modifying
+  @Query("UPDATE User u SET u.isActive = 0 WHERE u.id = ?1")
+  void eliminarUsuario(Long id);
 
 }

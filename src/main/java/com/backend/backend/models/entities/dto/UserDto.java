@@ -16,6 +16,7 @@ public class UserDto {
   private Date birthday;
   private String address;
   private boolean admin;
+  private Integer isActive;
   private List<Role> roles;
   
   public UserDto(){
@@ -23,7 +24,7 @@ public class UserDto {
   }
   
   public UserDto(Long id, String firstname, String lastname, String username, String email, String rut,
-    String identificator, Date birthday, String address, boolean admin, List<Role> roles) {
+    String identificator, Date birthday, String address, boolean admin, Integer isActive, List<Role> roles) {
     this.id = id;
     this.firstname = firstname;
     this.lastname = lastname;
@@ -34,6 +35,7 @@ public class UserDto {
     this.birthday = birthday;
     this.address = address;
     this.admin = admin;
+    this.isActive = isActive;
     this.roles = roles;
   }
 
@@ -124,5 +126,15 @@ public class UserDto {
   public void setRoles(List<Role> roles) {
     this.roles = roles;
   }
+
+  public Integer getIsActive() {
+    return isActive;
+  }
+
+  public void setIsActive(Integer isActive) {
+    this.isActive = isActive;
+  }
+
+  
 
 }
