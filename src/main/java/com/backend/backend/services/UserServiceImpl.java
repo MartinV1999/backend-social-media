@@ -104,6 +104,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void removeUser(Long id) {
+    //Eliminado logico
     userRepository.eliminarUsuario(id);
   }
 }
