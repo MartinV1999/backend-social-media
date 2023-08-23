@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.backend.backend.models.entities.User;
+import com.backend.backend.repositories.UserRepository;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,9 +30,11 @@ import static com.backend.backend.auth.TokenJwtConfig.*;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
   public AuthenticationManager authenticationManager;
+  private UserRepository userRepository;
 
-  public JwtAuthenticationFilter(AuthenticationManager authenticationManager){
+  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, UserRepository userRepository){
     this.authenticationManager = authenticationManager;
+    this.userRepository = userRepository;
   }
 
   @Override
@@ -43,7 +46,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     try {
       user = new ObjectMapper().readValue(request.getInputStream(), User.class);
-      username = user.getUsername();
+      username = user.getEmail();
       password = user.getPassword();
 
     } catch (StreamReadException e) {
@@ -63,11 +66,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       Authentication authResult) throws IOException, ServletException {
     String username = ((org.springframework.security.core.userdetails.User ) authResult.getPrincipal()).getUsername();
     
+    Long userId = userRepository.getUserId(username);
+
     Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+
     boolean isAdmin = roles.stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"));
     Claims claims = Jwts.claims();
     claims.put("authorities", new ObjectMapper().writeValueAsString(roles));
     claims.put("isAdmin", isAdmin);
+    claims.put("userId", userId);
     String token = Jwts.builder()
       .setClaims(claims)
       .setSubject(username)

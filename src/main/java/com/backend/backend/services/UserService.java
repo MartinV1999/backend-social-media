@@ -3,6 +3,9 @@ package com.backend.backend.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.backend.backend.models.entities.User;
 import com.backend.backend.models.entities.dto.UserDto;
 import com.backend.backend.models.entities.request.UserRequest;
@@ -10,6 +13,8 @@ import com.backend.backend.models.entities.request.UserRequest;
 public interface UserService {
   
   List<UserDto> findAll();
+
+  Page<UserDto> findAll(Pageable pageable);
 
   UserDto save(User user);
 
@@ -20,5 +25,10 @@ public interface UserService {
   Optional<User> getUserById(Long id);
 
   void removeUser(Long id);
+
+  Long getUserId(String email);
+
+  Optional<User> getUserByEmail(String email);
+
 
 }

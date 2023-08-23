@@ -34,6 +34,7 @@ public class Post implements Serializable {
   @OneToMany(mappedBy = "post" , fetch = FetchType.LAZY , cascade = CascadeType.ALL)
   private List<Comment> comments;
 
+  private String title;
   private String urlMedia;
   private String description;
   private Integer votes = 0;
@@ -86,5 +87,14 @@ public class Post implements Serializable {
   public void setComments(List<Comment> comments) {
     this.comments = comments;
   }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
 
 }

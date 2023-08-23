@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,8 +81,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public Optional<UserDto> update(UserRequest user, Long id) {
     Optional<User> o = userRepository.findById(id);
+    Optional<User> os = userRepository.getUserCompareDifferentId(id, user.getEmail());
     User userOptional = null;
-    if(o.isPresent()){
+    if(o.isPresent() && !os.isPresent()){
       User userDb = o.orElseThrow();
       userDb.setRoles(getRoles(user));
       userDb.setFirstname(user.getFirstname());
@@ -106,5 +109,22 @@ public class UserServiceImpl implements UserService {
   public void removeUser(Long id) {
     //Eliminado logico
     userRepository.eliminarUsuario(id);
+  }
+
+  @Override
+  public Long getUserId(String email) {
+    return userRepository.getUserId(email);
+  }
+
+  @Override
+  public Optional<User> getUserByEmail(String email) {
+    return userRepository.getUserByEmail(email);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<UserDto> findAll(Pageable pageable) {
+    Page<User> usersPage = userRepository.findAll(pageable);
+    return usersPage.map(u -> DtoMapperUser.builder().setUser(u).build());
   }
 }

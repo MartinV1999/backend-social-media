@@ -28,7 +28,7 @@ public class JpaUserDetailsService implements UserDetailsService {
   @Transactional(readOnly = true)
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
   
-    Optional<com.backend.backend.models.entities.User> o = repository.getUserByUsername(username);
+    Optional<com.backend.backend.models.entities.User> o = repository.getUserByEmail(username);
     if(!o.isPresent()){
       throw new UsernameNotFoundException(String.format("Username %s no existe en el sistema!", username));
     }
@@ -40,7 +40,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     .map(r -> new SimpleGrantedAuthority(r.getName()))
     .collect(Collectors.toList());
 
-    return new User(user.getUsername(), user.getPassword(),true,true,true,true,authorities);
+    return new User(user.getEmail(), user.getPassword(),true,true,true,true,authorities);
 
   }
   

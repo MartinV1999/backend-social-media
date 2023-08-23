@@ -22,12 +22,16 @@ import org.springframework.web.filter.CorsFilter;
 
 import com.backend.backend.auth.filters.JwtAuthenticationFilter;
 import com.backend.backend.auth.filters.JwtValidationFilter;
+import com.backend.backend.repositories.UserRepository;
 
 @Configuration
 public class SpringSecurityConfig {
   
   @Autowired
   private AuthenticationConfiguration authenticationConfiguration;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @Bean
   PasswordEncoder passwordEncoder(){
@@ -42,20 +46,23 @@ public class SpringSecurityConfig {
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
     return http.authorizeHttpRequests(authRules -> authRules
+      //USERS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/users").permitAll()
-      .requestMatchers(HttpMethod.GET, "/users/{id}").permitAll()
+      .requestMatchers(HttpMethod.GET, "/users/{id}", "/users/page/{page}").permitAll()
       .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasAnyRole("ADMIN")
+      //POSTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/posts").permitAll()
       .requestMatchers(HttpMethod.POST, "/posts").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.PUT, "/posts").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/posts").hasAnyRole("USER","ADMIN")
+      //COMMENTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/comments").permitAll()
       .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER","ADMIN")
       .anyRequest().authenticated())
       .csrf(config -> config.disable())
-      .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
+      .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), userRepository))
       .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
       .sessionManagement(managment -> managment.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))

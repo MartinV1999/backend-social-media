@@ -1,9 +1,14 @@
 package com.backend.backend.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +26,7 @@ import com.backend.backend.models.entities.dto.UserDto;
 import com.backend.backend.models.entities.request.UserRequest;
 import com.backend.backend.services.UserService;
 
+
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(originPatterns = "*")
@@ -32,6 +38,12 @@ public class UserController {
   @GetMapping
   public List<UserDto> list(){
     return userService.findAll();
+  }
+
+  @GetMapping("/page/{page}")
+  public Page<UserDto> list(@PathVariable Integer page){
+    Pageable pageable = PageRequest.of(page, 15);
+    return userService.findAll(pageable);
   }
 
   @GetMapping("/{id}")
@@ -47,7 +59,13 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<?> create(@RequestBody User user){
-    return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
+    Optional<User> o = userService.getUserByEmail(user.getEmail());
+    if(!o.isPresent()){
+      return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
+    }else{
+      return validationNotDuplicateEmail();
+    }
+
   }
 
   @PutMapping("/{id}")
@@ -68,5 +86,11 @@ public class UserController {
     }else{
       return ResponseEntity.notFound().build();
     }
+  }
+
+  private ResponseEntity<?> validationNotDuplicateEmail(){
+    Map<String, String> errors = new HashMap<>();
+    errors.put("duplicate","El correo electronico esta en uso!");
+    return ResponseEntity.badRequest().body(errors);
   }
 }

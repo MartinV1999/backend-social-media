@@ -4,14 +4,16 @@ import java.util.List;
 
 public class PostDto {
   private Long id;
+  private String title;
   private UserPostDto user;
   private String urlMedia;
   private String description;
   private Integer votes;
   private List<CommentDto> comments;
   
-  public PostDto(Long id, UserPostDto user, String urlMedia, String description, Integer votes, List<CommentDto> comments) {
+  public PostDto(Long id, String title, UserPostDto user, String urlMedia, String description, Integer votes, List<CommentDto> comments) {
     this.id = id;
+    this.title = title;
     this.user = user;
     this.urlMedia = urlMedia;
     this.description = description;
@@ -66,4 +68,13 @@ public class PostDto {
   public void setVotes(Integer votes) {
     this.votes = votes;
   }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
 }

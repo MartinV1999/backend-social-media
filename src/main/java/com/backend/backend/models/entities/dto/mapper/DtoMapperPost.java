@@ -33,6 +33,7 @@ public class DtoMapperPost {
         .collect(Collectors.toList());
 
     return new PostDto(this.post.getId(),
+      this.post.getTitle(),
       new UserPostDto(
         this.post.getUser().getId(),
         this.post.getUser().getFirstname(),
