@@ -6,16 +6,16 @@ public class PostDto {
   private Long id;
   private String title;
   private UserPostDto user;
-  private String urlMedia;
+  private List<PostPicturesDto> postPictures;
   private String description;
   private Integer votes;
   private List<CommentDto> comments;
   
-  public PostDto(Long id, String title, UserPostDto user, String urlMedia, String description, Integer votes, List<CommentDto> comments) {
+  public PostDto(Long id, String title, UserPostDto user, List<PostPicturesDto> postPictures, String description, Integer votes, List<CommentDto> comments) {
     this.id = id;
     this.title = title;
     this.user = user;
-    this.urlMedia = urlMedia;
+    this.postPictures = postPictures;
     this.description = description;
     this.votes = votes;
     this.comments = comments;
@@ -45,13 +45,6 @@ public class PostDto {
     this.comments = comments;
   }
 
-  public String getUrlMedia() {
-    return urlMedia;
-  }
-
-  public void setUrlMedia(String urlMedia) {
-    this.urlMedia = urlMedia;
-  }
 
   public String getDescription() {
     return description;
@@ -75,6 +68,14 @@ public class PostDto {
 
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  public List<PostPicturesDto> getPostPictures() {
+    return postPictures;
+  }
+
+  public void setPostPictures(List<PostPicturesDto> postPictures) {
+    this.postPictures = postPictures;
   }
 
 }

@@ -1,33 +1,38 @@
   package com.backend.backend.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.backend.backend.models.entities.Comment;
 import com.backend.backend.models.entities.Post;
+import com.backend.backend.models.entities.PostPictures;
 import com.backend.backend.models.entities.User;
 import com.backend.backend.models.entities.dto.PostDto;
-import com.backend.backend.models.entities.request.CrearPostRequest;
+import com.backend.backend.services.IS3Service;
 import com.backend.backend.services.PostService;
 import com.backend.backend.services.UserService;
 
-import jakarta.validation.Valid;
-
 @RestController()
 @RequestMapping("/posts")
+@CrossOrigin(originPatterns = "*")
 public class PostController {
 
   @Autowired
@@ -36,6 +41,9 @@ public class PostController {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private IS3Service s3Service;
+
   @GetMapping
   public List<PostDto> list(){
     return postService.findAll();
@@ -43,7 +51,7 @@ public class PostController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> show(@PathVariable Long id){
-    Optional<Post> o = postService.findById(id);
+    Optional<PostDto> o = postService.showPostById(id);
     if(o.isPresent()){
       return ResponseEntity.ok(o.orElseThrow());
     }else{
@@ -51,37 +59,102 @@ public class PostController {
     }
   }
 
-  @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody CrearPostRequest postRequest, BindingResult result){
-    if(result.hasErrors()){
-      return validation(result);
-    }else{
-      Optional<User> userOptional = userService.getUserById(postRequest.getUserId());
+  @PostMapping //@Valid @RequestBody CrearPostRequest postRequest, BindingResult result, 
+  public ResponseEntity<?> create(@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value= "file", required = false) List<MultipartFile> file){
+    
+    UUID uuid = UUID.randomUUID();
+    Post post = new Post();
+    List<PostPictures> postPictures = new ArrayList<>();
+    List<Comment> comments = new ArrayList<>();
+
+    Integer counter = 0;
+    try {
+
+      Optional<User> userOptional = userService.getUserById(userId);
       if(userOptional.isPresent()){
-        Post post = postRequest.getPost();
         post.setUser(userOptional.orElseThrow());
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.save(postRequest.getPost()));
-      }else{
-        return ResponseEntity.notFound().build();
+        post.setTitle(title);
+        post.setVotes(0);
+        post.setDescription(description);
+        post.setComments(comments);
+
+        for (MultipartFile multipartFile : file) {
+          PostPictures postPicture = new PostPictures();
+          counter++;
+          String originalFileName = multipartFile.getOriginalFilename();
+          String[] extensions = null;
+          if(originalFileName != null){
+            extensions = multipartFile.getOriginalFilename().split("\\."); 
+          }
+          String filename = "IMAGE-" + counter.toString() + "." + extensions[1];
+
+          String url = s3Service.uploadFile(filename,counter, uuid, "dev/posts/", multipartFile);
+          postPicture.setPost(post);
+          postPicture.setUrl(url);
+          postPicture.setUuid(uuid);
+          postPicture.setFilename(filename);
+          postPictures.add(postPicture);
+        }
+
+        post.setImages(postPictures);
+        postService.save(post);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
       }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
     }
+
+    return ResponseEntity.notFound().build();
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CrearPostRequest postRequest){
+  public ResponseEntity<?> update(@PathVariable Long id, @RequestParam("uuid") UUID uuid, @RequestParam("DeleteFiles") String[] deleteFiles ,@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value = "file", required = false) List<MultipartFile> file){
+    Post post = new Post();
+    List<PostPictures> postPictures = new ArrayList<>();
+    List<Comment> comments = new ArrayList<>();
+    Integer counter = 0;
 
-    Post post = null;
-    Optional<User> userOptional = userService.getUserById(postRequest.getUserId());
-    if(!userOptional.isPresent()){
-      return ResponseEntity.notFound().build();
-    }
+    try {
+      Optional<User> user = userService.getUserById(userId);
+      if(user.isPresent()){
+        post.setUser(user.orElseThrow());
+      }
 
-    post = postRequest.getPost();
-    post.setUser(userOptional.orElseThrow());
+      
 
-    Optional<PostDto> o = postService.update(post , id);
-    if(o.isPresent()){
-      return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
+      if(!file.isEmpty()){
+        for (MultipartFile multipartFile : file) {
+          PostPictures postPicture = new PostPictures();
+          counter++;
+          String originalFileName = multipartFile.getOriginalFilename();
+          String[] extensions = null;
+          if(originalFileName != null){
+            extensions = multipartFile.getOriginalFilename().split("\\."); 
+          }
+          String filename = "IMAGE-" + counter.toString() + "." + extensions[1];
+
+          String url = s3Service.uploadFile(filename,counter, uuid, "dev/posts/", multipartFile);
+          postPicture.setPost(post);
+          postPicture.setUrl(url);
+          postPicture.setUuid(uuid);
+          postPicture.setFilename(filename);
+          postPictures.add(postPicture);
+        }
+      }
+
+      post.setId(id);
+      post.setComments(comments);
+      post.setTitle(title);
+      post.setDescription(description);
+      post.setVotes(0);
+      post.setImages(postPictures);
+
+      postService.update(post, userId);
+
+      return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
     }
 
     return ResponseEntity.notFound().build();

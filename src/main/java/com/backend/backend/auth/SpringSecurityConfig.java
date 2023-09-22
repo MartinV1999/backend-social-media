@@ -47,19 +47,23 @@ public class SpringSecurityConfig {
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
     return http.authorizeHttpRequests(authRules -> authRules
       //USERS ENDPOINTS
-      .requestMatchers(HttpMethod.GET, "/users").permitAll()
-      .requestMatchers(HttpMethod.GET, "/users/{id}", "/users/page/{page}").permitAll()
+      .requestMatchers(HttpMethod.GET, "/users","/users/{id}", "/users/page/{page}").permitAll()
+      .requestMatchers(HttpMethod.POST, "/users/account").permitAll()
       .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasAnyRole("ADMIN")
       //POSTS ENDPOINTS
-      .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+      .requestMatchers(HttpMethod.GET, "/posts", "/posts/{id}").permitAll()
       .requestMatchers(HttpMethod.POST, "/posts").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.PUT, "/posts").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/posts").hasAnyRole("USER","ADMIN")
       //COMMENTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/comments").permitAll()
       .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER","ADMIN")
+
+      //AUTH ENDPOINTS
+      .requestMatchers(HttpMethod.POST, "/auth").permitAll()
+
       .anyRequest().authenticated())
       .csrf(config -> config.disable())
       .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), userRepository))

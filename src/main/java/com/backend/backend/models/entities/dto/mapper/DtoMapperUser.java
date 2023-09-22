@@ -36,6 +36,7 @@ public class DtoMapperUser {
       this.user.getAddress(),
       isAdmin,
       this.user.getIsActive(),
-      this.user.getRoles());
+      this.user.getRoles(),
+      this.user.getUrlImage());
   }
 }

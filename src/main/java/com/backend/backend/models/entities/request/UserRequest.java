@@ -15,6 +15,7 @@ public class UserRequest implements IUser {
   private String identificator;
   private Date birthday;
   private String address;
+  private String password;
   private boolean admin;
 
   //private List<Role> roles;
@@ -87,9 +88,19 @@ public class UserRequest implements IUser {
   public boolean isAdmin() {
     return admin;
   }
-  
+
   public void setAdmin(boolean admin) {
     this.admin = admin;
   }
 
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+
+  
 }

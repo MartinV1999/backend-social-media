@@ -48,7 +48,9 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public UserDto save(User user) {
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    if(user.getPassword() != null){
+      user.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
     user.setRoles(getRoles(user));
     return DtoMapperUser.builder().setUser(userRepository.save(user)).build();
   }
@@ -126,5 +128,26 @@ public class UserServiceImpl implements UserService {
   public Page<UserDto> findAll(Pageable pageable) {
     Page<User> usersPage = userRepository.findAll(pageable);
     return usersPage.map(u -> DtoMapperUser.builder().setUser(u).build());
+  }
+
+  @Override
+  public void setUserNative(String username, String email, String urlImage, Integer isActive, String password) {
+    userRepository.setUserNative(username, email, passwordEncoder.encode(password),  urlImage, isActive);
+    Optional<UserDto> u = getUserByEmailDto(email);
+    if(u.isPresent()){
+      Optional<Role> ou = roleRepository.findByName("ROLE_USER");
+      List<Role> roles = new ArrayList<>();
+      if(ou.isPresent()){
+        roles.add(ou.orElseThrow());
+      }
+      userRepository.setRoleNative(u.orElseThrow().getId(), ou.orElseThrow().getId());
+    }
+
+  }
+
+  @Override
+  public Optional<UserDto> getUserByEmailDto(String email) {
+    return userRepository.getUserByEmailDto(email)
+      .map(u -> DtoMapperUser.builder().setUser(u).build());
   }
 }

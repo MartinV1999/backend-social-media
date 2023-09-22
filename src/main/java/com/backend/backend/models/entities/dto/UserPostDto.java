@@ -6,17 +6,19 @@ public class UserPostDto {
   private String lastname;
   private String username;
   private String email;
+  private String urlImage;
   
   public UserPostDto(){
 
   }
   
-  public UserPostDto(Long id, String firstname, String lastname, String username, String email) {
+  public UserPostDto(Long id, String firstname, String lastname, String username, String email, String urlImage) {
     this.id = id;
     this.firstname = firstname;
     this.lastname = lastname;
     this.username = username;
     this.email = email;
+    this.urlImage = urlImage;
   }
 
   public Long getId() {
@@ -58,5 +60,15 @@ public class UserPostDto {
   public void setLastname(String lastname) {
     this.lastname = lastname;
   }
+
+  public String getUrlImage() {
+    return urlImage;
+  }
+
+  public void setUrlImage(String urlImage) {
+    this.urlImage = urlImage;
+  }
+
+  
 
 }

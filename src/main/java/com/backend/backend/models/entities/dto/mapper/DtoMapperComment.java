@@ -30,7 +30,8 @@ public class DtoMapperComment {
         this.comment.getUser().getFirstname(), 
         this.comment.getUser().getLastname(), 
         this.comment.getUser().getUsername(), 
-        this.comment.getUser().getEmail()
+        this.comment.getUser().getEmail(),
+        this.comment.getUser().getUrlImage()
       );
 
     return new CommentDto(

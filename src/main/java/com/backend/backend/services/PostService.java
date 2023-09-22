@@ -19,4 +19,5 @@ public interface PostService {
 
   Optional<Post> findById(Long id);
 
+  Optional<PostDto> showPostById(Long id);
 }

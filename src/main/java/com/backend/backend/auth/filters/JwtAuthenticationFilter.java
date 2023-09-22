@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     String username = ((org.springframework.security.core.userdetails.User ) authResult.getPrincipal()).getUsername();
     
     Long userId = userRepository.getUserId(username);
-
+    String photo = userRepository.getUserByEmail(username).orElseThrow().getUrlImage();
     Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
     boolean isAdmin = roles.stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"));
@@ -75,12 +75,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     claims.put("authorities", new ObjectMapper().writeValueAsString(roles));
     claims.put("isAdmin", isAdmin);
     claims.put("userId", userId);
+    claims.put("photo", photo);
     String token = Jwts.builder()
       .setClaims(claims)
       .setSubject(username)
       .signWith(SECRET_KEY)
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+      // .setExpiration(new Date(System.currentTimeMillis() + 3600000))
       .compact();
     response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
     Map<String,Object> body = new HashMap<>();

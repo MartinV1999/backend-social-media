@@ -40,7 +40,7 @@ public class PostServiceImpl implements PostService {
     if(o.isPresent()){
       Post postDb = o.orElseThrow();
       postDb.setDescription(post.getDescription());
-      postDb.setUrlMedia(post.getUrlMedia());
+      postDb.setImages(post.getImages());
       postDb.setUser(post.getUser());
       postDb.setVotes(post.getVotes());
       postOptional = postRepository.save(postDb);
@@ -51,6 +51,16 @@ public class PostServiceImpl implements PostService {
   @Override
   public Optional<Post> findById(Long id) {
     return postRepository.findById(id);
+  }
+
+  @Override
+  public Optional<PostDto> showPostById(Long id) {
+    return postRepository.findById(id)
+      .map(p -> DtoMapperPost
+        .builder()
+        .setPost(p)
+        .build()
+      );
   }
   
 }

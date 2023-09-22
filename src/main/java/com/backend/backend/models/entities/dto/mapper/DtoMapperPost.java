@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.backend.backend.models.entities.Post;
 import com.backend.backend.models.entities.dto.CommentDto;
 import com.backend.backend.models.entities.dto.PostDto;
+import com.backend.backend.models.entities.dto.PostPicturesDto;
 import com.backend.backend.models.entities.dto.UserPostDto;
 
 public class DtoMapperPost {
@@ -32,6 +33,11 @@ public class DtoMapperPost {
         .map(c -> DtoMapperComment.builder().setComment(c).build())
         .collect(Collectors.toList());
 
+      List<PostPicturesDto> postPictures = this.post.getImages().stream()
+        .map(i -> DtoMapperPostPictures.builder().setPostPictures(i).build())
+        .collect(Collectors.toList());
+      
+
     return new PostDto(this.post.getId(),
       this.post.getTitle(),
       new UserPostDto(
@@ -39,9 +45,10 @@ public class DtoMapperPost {
         this.post.getUser().getFirstname(),
         this.post.getUser().getLastname(),
         this.post.getUser().getUsername(),
-        this.post.getUser().getEmail()
+        this.post.getUser().getEmail(),
+        this.post.getUser().getUrlImage()
       ),
-      this.post.getUrlMedia(), 
+      postPictures, 
       this.post.getDescription(), 
       this.post.getVotes(),
       comments

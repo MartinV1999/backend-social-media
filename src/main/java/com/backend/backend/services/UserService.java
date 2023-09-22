@@ -22,6 +22,8 @@ public interface UserService {
 
   Optional<UserDto> findById(Long id);
 
+  Optional<UserDto> getUserByEmailDto(String email);
+
   Optional<User> getUserById(Long id);
 
   void removeUser(Long id);
@@ -29,6 +31,9 @@ public interface UserService {
   Long getUserId(String email);
 
   Optional<User> getUserByEmail(String email);
+
+  void setUserNative(String username, String email, String urlImage, Integer isActive, String password);
+
 
 
 }

@@ -18,13 +18,14 @@ public class UserDto {
   private boolean admin;
   private Integer isActive;
   private List<Role> roles;
+  private String urlImage;
   
   public UserDto(){
 
   }
   
   public UserDto(Long id, String firstname, String lastname, String username, String email, String rut,
-    String identificator, Date birthday, String address, boolean admin, Integer isActive, List<Role> roles) {
+    String identificator, Date birthday, String address, boolean admin, Integer isActive, List<Role> roles, String urlImage) {
     this.id = id;
     this.firstname = firstname;
     this.lastname = lastname;
@@ -37,6 +38,7 @@ public class UserDto {
     this.admin = admin;
     this.isActive = isActive;
     this.roles = roles;
+    this.urlImage = urlImage;
   }
 
   public Long getId() {
@@ -135,6 +137,12 @@ public class UserDto {
     this.isActive = isActive;
   }
 
-  
+  public String getUrlImage() {
+    return urlImage;
+  }
+
+  public void setUrlImage(String urlImage) {
+    this.urlImage = urlImage;
+  }
 
 }

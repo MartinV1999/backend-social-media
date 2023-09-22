@@ -21,6 +21,8 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "users")
@@ -30,15 +32,35 @@ public class User implements IUser {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @NotEmpty
   private String firstname;
+
+  @NotEmpty
   private String lastname;
+  
+  @NotEmpty
   private String username;
+
+  @NotEmpty
+  @Email
   private String email;
+
+  @NotEmpty
   private String rut;
+
+  @NotEmpty
   private String identificator;
+
   private Date birthday;
+
+  @NotEmpty
   private String address;
+
+  @NotEmpty
   private String password;
+
+  @Column(name = "url_image")
+  private String urlImage;
 
   @Column(name = "created_at")
   @Temporal(TemporalType.TIMESTAMP)
@@ -189,6 +211,12 @@ public class User implements IUser {
     this.isActive = isActive;
   }
 
-  
+  public String getUrlImage() {
+    return urlImage;
+  }
+
+  public void setUrlImage(String urlImage) {
+    this.urlImage = urlImage;
+  }
 
 }
