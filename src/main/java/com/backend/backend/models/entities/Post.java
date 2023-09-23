@@ -3,6 +3,7 @@ package com.backend.backend.models.entities;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -50,6 +51,8 @@ public class Post implements Serializable {
 
   @Column(name = "is_active")
   private Boolean isActive;
+
+  private UUID uuid;
 
   @Column(name = "created_at")
   @Temporal(TemporalType.TIMESTAMP)
@@ -122,6 +125,13 @@ public class Post implements Serializable {
   public void addImage(PostPictures image){
     this.images.add(image);
   }
-  
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
 
 }

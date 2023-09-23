@@ -1,6 +1,7 @@
 package com.backend.backend.models.entities.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 public class PostDto {
   private Long id;
@@ -10,8 +11,9 @@ public class PostDto {
   private String description;
   private Integer votes;
   private List<CommentDto> comments;
+  private UUID uuid;
   
-  public PostDto(Long id, String title, UserPostDto user, List<PostPicturesDto> postPictures, String description, Integer votes, List<CommentDto> comments) {
+  public PostDto(Long id, String title, UserPostDto user, List<PostPicturesDto> postPictures, String description, Integer votes, List<CommentDto> comments, UUID uuid) {
     this.id = id;
     this.title = title;
     this.user = user;
@@ -19,6 +21,7 @@ public class PostDto {
     this.description = description;
     this.votes = votes;
     this.comments = comments;
+    this.uuid = uuid;
   }
 
   public Long getId() {
@@ -76,6 +79,14 @@ public class PostDto {
 
   public void setPostPictures(List<PostPicturesDto> postPictures) {
     this.postPictures = postPictures;
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
   }
 
 }

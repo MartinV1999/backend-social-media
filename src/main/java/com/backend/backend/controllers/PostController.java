@@ -27,6 +27,7 @@ import com.backend.backend.models.entities.PostPictures;
 import com.backend.backend.models.entities.User;
 import com.backend.backend.models.entities.dto.PostDto;
 import com.backend.backend.services.IS3Service;
+import com.backend.backend.services.PostPicturesService;
 import com.backend.backend.services.PostService;
 import com.backend.backend.services.UserService;
 
@@ -40,6 +41,9 @@ public class PostController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private PostPicturesService postPicturesService;
 
   @Autowired
   private IS3Service s3Service;
@@ -67,7 +71,6 @@ public class PostController {
     List<PostPictures> postPictures = new ArrayList<>();
     List<Comment> comments = new ArrayList<>();
 
-    Integer counter = 0;
     try {
 
       Optional<User> userOptional = userService.getUserById(userId);
@@ -77,21 +80,21 @@ public class PostController {
         post.setVotes(0);
         post.setDescription(description);
         post.setComments(comments);
+        post.setUuid(uuid);
 
         for (MultipartFile multipartFile : file) {
+          UUID namefile = UUID.randomUUID();
           PostPictures postPicture = new PostPictures();
-          counter++;
           String originalFileName = multipartFile.getOriginalFilename();
           String[] extensions = null;
           if(originalFileName != null){
             extensions = multipartFile.getOriginalFilename().split("\\."); 
           }
-          String filename = "IMAGE-" + counter.toString() + "." + extensions[1];
+          String filename = namefile + "." + extensions[1];
 
-          String url = s3Service.uploadFile(filename,counter, uuid, "dev/posts/", multipartFile);
+          String url = s3Service.uploadFile(filename,uuid, "dev/posts/", multipartFile);
           postPicture.setPost(post);
           postPicture.setUrl(url);
-          postPicture.setUuid(uuid);
           postPicture.setFilename(filename);
           postPictures.add(postPicture);
         }
@@ -112,7 +115,6 @@ public class PostController {
     Post post = new Post();
     List<PostPictures> postPictures = new ArrayList<>();
     List<Comment> comments = new ArrayList<>();
-    Integer counter = 0;
 
     try {
       Optional<User> user = userService.getUserById(userId);
@@ -120,23 +122,29 @@ public class PostController {
         post.setUser(user.orElseThrow());
       }
 
-      
+      if(deleteFiles.length > 0){
+        for(String filename : deleteFiles){
+          Boolean isDelete = s3Service.deleteFile("dev/posts/", filename, uuid);
+          if(isDelete){
+            postPicturesService.deleteByFilename(filename);
+          }
+        }
+      }
 
-      if(!file.isEmpty()){
+      if(!file.isEmpty() || file != null){
         for (MultipartFile multipartFile : file) {
+          UUID nameFile = UUID.randomUUID();
           PostPictures postPicture = new PostPictures();
-          counter++;
           String originalFileName = multipartFile.getOriginalFilename();
           String[] extensions = null;
           if(originalFileName != null){
             extensions = multipartFile.getOriginalFilename().split("\\."); 
           }
-          String filename = "IMAGE-" + counter.toString() + "." + extensions[1];
+          String filename = nameFile + "." + extensions[1];
 
-          String url = s3Service.uploadFile(filename,counter, uuid, "dev/posts/", multipartFile);
+          String url = s3Service.uploadFile(filename, uuid, "dev/posts/", multipartFile);
           postPicture.setPost(post);
           postPicture.setUrl(url);
-          postPicture.setUuid(uuid);
           postPicture.setFilename(filename);
           postPictures.add(postPicture);
         }

@@ -51,7 +51,8 @@ public class DtoMapperPost {
       postPictures, 
       this.post.getDescription(), 
       this.post.getVotes(),
-      comments
+      comments,
+      this.post.getUuid()
     );
   }
 }

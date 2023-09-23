@@ -27,8 +27,7 @@ public class DtoMapperPostPictures {
     return new PostPicturesDto(
       this.pictures.getId(),
       this.pictures.getUrl(),
-      this.pictures.getFilename(),
-      this.pictures.getUuid()
+      this.pictures.getFilename()
     );
   }
 }

@@ -16,5 +16,10 @@ public class PostPicturesServiceImpl implements PostPicturesService {
   public PostPictures save(PostPictures postPictures) {
     return postPicturesRepository.save(postPictures);
   }
+
+  @Override
+  public void deleteByFilename(String filename) {
+    postPicturesRepository.deleteByFilename(filename);
+  }
   
 }

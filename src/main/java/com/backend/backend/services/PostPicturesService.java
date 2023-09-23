@@ -7,4 +7,5 @@ import com.backend.backend.models.entities.PostPictures;
 @Service
 public interface PostPicturesService {
   PostPictures save(PostPictures postPictures);
+  void deleteByFilename(String filename);
 }

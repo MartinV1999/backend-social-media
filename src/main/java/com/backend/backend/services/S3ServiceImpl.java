@@ -22,7 +22,7 @@ public class S3ServiceImpl implements IS3Service {
     this.s3Client = s3Client;
   }
 
-  public String uploadFile(String filename, Integer counter ,UUID uuid ,String ruta, MultipartFile file) throws IOException {
+  public String uploadFile(String filename,UUID uuid ,String ruta, MultipartFile file) throws IOException {
     try {
       String path = ruta + uuid + "/" + filename;
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()

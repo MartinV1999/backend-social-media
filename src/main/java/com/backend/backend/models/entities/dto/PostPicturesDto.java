@@ -1,18 +1,14 @@
 package com.backend.backend.models.entities.dto;
 
-import java.util.UUID;
-
 public class PostPicturesDto {
   private Long id;
   private String url;
   private String filename;
-  private UUID uuid;
 
-  public PostPicturesDto(Long id, String url, String filename, UUID uuid) {
+  public PostPicturesDto(Long id, String url, String filename) {
     this.id = id;
     this.url = url;
     this.filename = filename;
-    this.uuid = uuid;
   }
   public Long getId() {
     return id;
@@ -34,15 +30,5 @@ public class PostPicturesDto {
   public void setFilename(String filename) {
     this.filename = filename;
   }
-
-  public UUID getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(UUID uuid) {
-    this.uuid = uuid;
-  }
-
-  
 
 }

@@ -1,7 +1,5 @@
 package com.backend.backend.models.entities;
 
-import java.util.UUID;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,8 +24,6 @@ public class PostPictures {
 
   private String filename;
 
-  private UUID uuid;
-
   public Long getId() {
     return id;
   }
@@ -50,14 +46,6 @@ public class PostPictures {
 
   public void setUrl(String url) {
     this.url = url;
-  }
-
-  public UUID getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(UUID uuid) {
-    this.uuid = uuid;
   }
 
   public String getFilename() {
