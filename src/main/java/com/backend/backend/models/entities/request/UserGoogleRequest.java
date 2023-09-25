@@ -1,6 +1,7 @@
 package com.backend.backend.models.entities.request;
 
 public class UserGoogleRequest {
+  private String idOAuthToken;
   private String email;
   private String displayName;
   private String picture;
@@ -23,4 +24,11 @@ public class UserGoogleRequest {
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
+  public String getIdOAuthToken() {
+    return idOAuthToken;
+  }
+  public void setIdOAuthToken(String idOAuthToken) {
+    this.idOAuthToken = idOAuthToken;
+  }
+
 }
