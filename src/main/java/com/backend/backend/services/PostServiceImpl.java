@@ -39,6 +39,8 @@ public class PostServiceImpl implements PostService {
     Post postOptional = null;
     if(o.isPresent()){
       Post postDb = o.orElseThrow();
+      postDb.setId(post.getId());
+      postDb.setTitle(post.getTitle());
       postDb.setDescription(post.getDescription());
       postDb.setImages(post.getImages());
       postDb.setUser(post.getUser());

@@ -82,21 +82,23 @@ public class PostController {
         post.setComments(comments);
         post.setUuid(uuid);
 
-        for (MultipartFile multipartFile : file) {
-          UUID namefile = UUID.randomUUID();
-          PostPictures postPicture = new PostPictures();
-          String originalFileName = multipartFile.getOriginalFilename();
-          String[] extensions = null;
-          if(originalFileName != null){
-            extensions = multipartFile.getOriginalFilename().split("\\."); 
-          }
-          String filename = namefile + "." + extensions[1];
+        if(file != null){
+          for (MultipartFile multipartFile : file) {
+            UUID namefile = UUID.randomUUID();
+            PostPictures postPicture = new PostPictures();
+            String originalFileName = multipartFile.getOriginalFilename();
+            String[] extensions = null;
+            if(originalFileName != null){
+              extensions = multipartFile.getOriginalFilename().split("\\."); 
+            }
+            String filename = namefile + "." + extensions[1];
 
-          String url = s3Service.uploadFile(filename,uuid, "dev/posts/", multipartFile);
-          postPicture.setPost(post);
-          postPicture.setUrl(url);
-          postPicture.setFilename(filename);
-          postPictures.add(postPicture);
+            String url = s3Service.uploadFile(filename,uuid, "dev/posts/", multipartFile);
+            postPicture.setPost(post);
+            postPicture.setUrl(url);
+            postPicture.setFilename(filename);
+            postPictures.add(postPicture);
+          }
         }
 
         post.setImages(postPictures);
@@ -112,10 +114,11 @@ public class PostController {
 
   @PutMapping("/{id}")
   public ResponseEntity<?> update(@PathVariable Long id, @RequestParam("uuid") UUID uuid, @RequestParam("DeleteFiles") String[] deleteFiles ,@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value = "file", required = false) List<MultipartFile> file){
+
     Post post = new Post();
     List<PostPictures> postPictures = new ArrayList<>();
     List<Comment> comments = new ArrayList<>();
-
+    
     try {
       Optional<User> user = userService.getUserById(userId);
       if(user.isPresent()){
@@ -130,8 +133,8 @@ public class PostController {
           }
         }
       }
-
-      if(!file.isEmpty() || file != null){
+      
+      if(file != null){
         for (MultipartFile multipartFile : file) {
           UUID nameFile = UUID.randomUUID();
           PostPictures postPicture = new PostPictures();
@@ -149,7 +152,7 @@ public class PostController {
           postPictures.add(postPicture);
         }
       }
-
+      
       post.setId(id);
       post.setComments(comments);
       post.setTitle(title);
@@ -157,9 +160,7 @@ public class PostController {
       post.setVotes(0);
       post.setImages(postPictures);
 
-      postService.update(post, userId);
-
-      return ResponseEntity.status(HttpStatus.CREATED).build();
+      return ResponseEntity.status(HttpStatus.CREATED).body(postService.update(post, id));
 
     } catch (Exception e) {
       System.out.println(e.getMessage());

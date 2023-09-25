@@ -100,7 +100,7 @@ public class AuthController {
       .setSubject(email)
       .signWith(SECRET_KEY)
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+      // .setExpiration(new Date(System.currentTimeMillis() + 3600000))
       .compact();
 
     Map<String,Object> body = new HashMap<>();
