@@ -62,7 +62,7 @@ public class SpringSecurityConfig {
       .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER","ADMIN")
 
       //AUTH ENDPOINTS
-      .requestMatchers(HttpMethod.POST, "/auth").permitAll()
+      .requestMatchers(HttpMethod.POST, "/auth","/auth/test").permitAll()
 
       .anyRequest().authenticated())
       .csrf(config -> config.disable())
