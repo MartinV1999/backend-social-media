@@ -1,12 +1,10 @@
 package com.backend.backend.controllers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,19 +15,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.backend.models.entities.User;
 import com.backend.backend.models.entities.dto.UserDto;
 import com.backend.backend.models.entities.request.UserRequest;
+import com.backend.backend.services.IS3Service;
 import com.backend.backend.services.UserService;
 
 @RestController
@@ -39,6 +38,9 @@ public class UserController {
   
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private IS3Service s3Service;
 
   @GetMapping
   public List<UserDto> list(){
@@ -62,40 +64,41 @@ public class UserController {
     }
   }
 
+  @PostMapping("/test")
+  public ResponseEntity<?> test(@RequestPart("user") User user, @RequestParam("file") MultipartFile file){
+    return ResponseEntity.status(HttpStatus.CREATED).body(file.getOriginalFilename());
+  }
+
   @PostMapping
-  public ResponseEntity<?> create(@ModelAttribute UserRequest user, @RequestParam("urlImage") MultipartFile file){
+  public ResponseEntity<?> create(@RequestPart("user") User user, @RequestParam(value = "file", required = false) MultipartFile file){
     
-    Optional<User> o = userService.getUserByEmail(user.getEmail());
-    if(!o.isPresent()){
-
-      User u = new User();
-      u.setFirstname(user.getFirstname());
-      u.setLastname(user.getLastname());
-      u.setUsername(user.getUsername());
-      u.setEmail(user.getEmail());
-      u.setRut(user.getRut());
-      u.setIdentificator(user.getIdentificator());
-      u.setBirthday(user.getBirthday());
-      u.setAddress(user.getAddress());
-      u.setPassword(user.getPassword());
-      u.setAdmin(user.isAdmin());
-
-      if(!file.isEmpty()){
-        Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-        String rootPath = directorioRecursos.toFile().getAbsolutePath();
-        try {
-          byte[] bytes = file.getBytes();
-          Path rutaCompleta = Paths.get(rootPath + "//" + file.getOriginalFilename());
-          Files.write(rutaCompleta, bytes);
-          u.setUrlImage(rutaCompleta.toAbsolutePath().toString());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-
+    try {
+      Optional<User> o = userService.getUserByEmail(user.getEmail());
+      UUID uuid = UUID.randomUUID();
+      if(!o.isPresent()){
+        // User u = new User();
+        // u.setFirstname(user.getFirstname());
+        // u.setLastname(user.getLastname());
+        // u.setUsername(user.getUsername());
+        // u.setEmail(user.getEmail());
+        // u.setRut(user.getRut());
+        // u.setIdentificator(user.getIdentificator());
+        // u.setBirthday(user.getBirthday());
+        // u.setAddress(user.getAddress());
+        // u.setPassword(user.getPassword());
+        // u.setAdmin(user.isAdmin());
+        UUID uuid2 = UUID.randomUUID();
+        String[] extension = file.getOriginalFilename().split("\\."); 
+        String filename = uuid + "." + extension[1];
+        String url = s3Service.uploadFile(filename, uuid2, "dev/users/", file);
+        user.setUrlImage(url);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
+      }else{
+        return validationNotDuplicateEmail();
       }
-      return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(u));
-    }else{
-      return validationNotDuplicateEmail();
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
   }
