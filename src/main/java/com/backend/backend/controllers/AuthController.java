@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,6 +41,12 @@ import io.jsonwebtoken.Jwts;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+  @Value("${google.clientId1}")
+  private String clientId1;
+
+  @Value("${google.clientId2}")
+  private String clientId2;
 
   @Autowired
   private UserService userService;
@@ -110,10 +117,7 @@ public class AuthController {
       // Specify the CLIENT_ID of the app that accesses the backend:
       // .setAudience(Collections.singletonList("161955849471-bguqectccp35mjt0lmba3k3bko5bd2ur.apps.googleusercontent.com"))
       // Or, if multiple clients access the backend:
-      .setAudience(Arrays.asList(
-        "161955849471-f6gbmsebsd4q9m9700o8v5ni06gagpr4.apps.googleusercontent.com",
-        "161955849471-bguqectccp35mjt0lmba3k3bko5bd2ur.apps.googleusercontent.com"
-      ))
+      .setAudience(Arrays.asList(clientId1, clientId2))
       .build();
 
       // (Receive idTokenString by HTTPS POST)
