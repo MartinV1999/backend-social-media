@@ -3,6 +3,7 @@ package com.backend.backend.services;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +15,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Service
 public class S3ServiceImpl implements IS3Service {
 
-  String bucketName = "aws-social-media-gokias";
+  @Value("${aws.bucket.s3}")
+  private String bucketName;
 
   private final S3Client s3Client;
 

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -64,11 +63,6 @@ public class UserController {
     }
   }
 
-  @PostMapping("/test")
-  public ResponseEntity<?> test(@RequestPart("user") User user, @RequestParam("file") MultipartFile file){
-    return ResponseEntity.status(HttpStatus.CREATED).body(file.getOriginalFilename());
-  }
-
   @PostMapping
   public ResponseEntity<?> create(@RequestPart("user") User user, @RequestParam(value = "file", required = false) MultipartFile file){
     
@@ -76,22 +70,14 @@ public class UserController {
       Optional<User> o = userService.getUserByEmail(user.getEmail());
       UUID uuid = UUID.randomUUID();
       if(!o.isPresent()){
-        // User u = new User();
-        // u.setFirstname(user.getFirstname());
-        // u.setLastname(user.getLastname());
-        // u.setUsername(user.getUsername());
-        // u.setEmail(user.getEmail());
-        // u.setRut(user.getRut());
-        // u.setIdentificator(user.getIdentificator());
-        // u.setBirthday(user.getBirthday());
-        // u.setAddress(user.getAddress());
-        // u.setPassword(user.getPassword());
-        // u.setAdmin(user.isAdmin());
-        UUID uuid2 = UUID.randomUUID();
-        String[] extension = file.getOriginalFilename().split("\\."); 
-        String filename = uuid + "." + extension[1];
-        String url = s3Service.uploadFile(filename, uuid2, "dev/users/", file);
-        user.setUrlImage(url);
+        if(file != null){
+          UUID uuid2 = UUID.randomUUID();
+          String[] extension = file.getOriginalFilename().split("\\."); 
+          String filename = uuid2 + "." + extension[1];
+          String url = s3Service.uploadFile(filename, uuid, "dev/users/", file);
+          user.setUrlImage(url);
+          user.setUuid(uuid);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
       }else{
         return validationNotDuplicateEmail();
@@ -104,8 +90,17 @@ public class UserController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UserRequest user){
-    Optional<UserDto> o = userService.update(user, id);
+  public ResponseEntity<?> update(@PathVariable Long id, @RequestPart("user") UserRequest user, @RequestParam(value = "file", required = false) MultipartFile file){
+    Optional<UserDto> o = userService.update(user, id, file);
+    if(o.isPresent()){
+      return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
+    }
+    return ResponseEntity.notFound().build();
+  }
+
+  @PutMapping("/complete/{id}")
+  public ResponseEntity<?> updateGoogleUser(@PathVariable Long id, @RequestPart("user") UserRequest user, @RequestParam(value = "file", required = false) MultipartFile file){
+    Optional<UserDto> o = userService.update(user, id, file);
     if(o.isPresent()){
       return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
     }
@@ -128,4 +123,5 @@ public class UserController {
     errors.put("duplicate","El correo electronico esta en uso!");
     return ResponseEntity.badRequest().body(errors);
   }
+
 }

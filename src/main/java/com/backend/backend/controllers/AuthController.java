@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,17 +53,6 @@ public class AuthController {
   @Autowired
   private ProviderAccountService accountService;
 
-  @PostMapping("/test")
-  public ResponseEntity<?> GoogleAuthTest(@RequestBody UserGoogleRequest account){
-    if(validateGoogleToken(account.getIdOAuthToken())){
-      System.out.println("Valido");
-      return ResponseEntity.ok().build();
-    }else{
-      System.out.println("Invalido");
-      return ResponseEntity.badRequest().build();
-    }
-  }
-
   @PostMapping()
   public Map<String,Object> auth(@RequestBody UserGoogleRequest account){
     ProvidersAccounts ac = new ProvidersAccounts();
@@ -83,13 +71,14 @@ public class AuthController {
         user.setUsername(userOptional.orElseThrow().getUsername());
         user.setUrlImage(userOptional.orElseThrow().getUrlImage());
         user.setIsActive(0);
+        user.setIsComplete(false);
         
         ac.setEmail(account.getEmail());
         ac.setName(account.getDisplayName());
         ac.setProvider("Google");
         ac.setUser(user);
         accountService.save(ac);
-        return generateToken(account.getEmail(), account.getPicture(), user.getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), user.getId(),false, false);
       } else if (u.isPresent() && !p.isPresent()){
         Optional<User> userOptional = userService.getUserByEmail(account.getEmail());
         ac.setEmail(account.getEmail());
@@ -97,9 +86,9 @@ public class AuthController {
         ac.setProvider("Google");
         ac.setUser(userOptional.orElseThrow());
         accountService.save(ac);
-        return generateToken(account.getEmail(), account.getPicture(), userOptional.orElseThrow().getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), userOptional.orElseThrow().getId(),false, userOptional.orElseThrow().getIsComplete());
       }else if (p.isPresent() && u.isPresent()) {
-        return generateToken(account.getEmail(), account.getPicture(), u.orElseThrow().getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), u.orElseThrow().getId(),false, u.orElseThrow().getIsComplete());
       }
     }else{
       return null;
@@ -135,7 +124,7 @@ public class AuthController {
     }
   }
 
-  private Map<String,Object> generateToken(String email, String photo, Long userId, boolean isAdmin){
+  private Map<String,Object> generateToken(String email, String photo, Long userId, boolean isAdmin, boolean isComplete){
     Claims claims = Jwts.claims();
     
     ObjectMapper objectMapper = new ObjectMapper();
@@ -150,6 +139,7 @@ public class AuthController {
     claims.put("isAdmin", isAdmin);
     claims.put("userId", userId);
     claims.put("photo", photo);
+    claims.put("isComplete", isComplete);
 
     String token = Jwts.builder()
       .setClaims(claims)

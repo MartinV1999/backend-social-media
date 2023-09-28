@@ -3,6 +3,7 @@ package com.backend.backend.models.entities;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -79,6 +80,10 @@ public class User implements IUser {
   @OneToMany
   private List<Post> posts;
 
+  private Boolean isComplete;
+
+  private UUID uuid;
+
   @ManyToMany
   @JoinTable(
     name = "users_roles",
@@ -92,6 +97,7 @@ public class User implements IUser {
   private void prePersist(){
     createAt = new Date();
     isActive = 0;
+    isComplete = false;
   }
 
   public User() {
@@ -217,6 +223,22 @@ public class User implements IUser {
 
   public void setUrlImage(String urlImage) {
     this.urlImage = urlImage;
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
+
+  public Boolean getIsComplete() {
+    return isComplete;
+  }
+
+  public void setIsComplete(Boolean isComplete) {
+    this.isComplete = isComplete;
   }
 
 }

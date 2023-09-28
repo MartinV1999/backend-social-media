@@ -3,6 +3,7 @@ package com.backend.backend.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.backend.models.entities.IUser;
 import com.backend.backend.models.entities.Role;
@@ -25,6 +27,8 @@ import com.backend.backend.repositories.UserRepository;
 @Service
 public class UserServiceImpl implements UserService {
 
+  // private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
   @Autowired
   private UserRepository userRepository;
 
@@ -33,6 +37,9 @@ public class UserServiceImpl implements UserService {
 
   @Autowired
   private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private IS3Service s3Service;
 
   @Override
   @Transactional(readOnly = true)
@@ -81,24 +88,47 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<UserDto> update(UserRequest user, Long id) {
+  public Optional<UserDto> update(UserRequest user, Long id, MultipartFile file) {
     Optional<User> o = userRepository.findById(id);
     Optional<User> os = userRepository.getUserCompareDifferentId(id, user.getEmail());
     User userOptional = null;
-    if(o.isPresent() && !os.isPresent()){
-      User userDb = o.orElseThrow();
-      userDb.setRoles(getRoles(user));
-      userDb.setFirstname(user.getFirstname());
-      userDb.setLastname(user.getLastname());
-      userDb.setUsername(user.getUsername());
-      userDb.setEmail(user.getEmail());
-      userDb.setRut(user.getRut());
-      userDb.setIdentificator(user.getIdentificator());
-      userDb.setBirthday(user.getBirthday());
-      userDb.setAddress(user.getAddress());
-      userOptional = userRepository.save(userDb);
+    try {
+      if(o.isPresent() && !os.isPresent()){
+        User userDb = o.orElseThrow();
+        
+        if(file != null){
+          UUID uuid = UUID.randomUUID();
+          UUID uuid2 = UUID.randomUUID();
+          String[] extension = file.getOriginalFilename().split("\\."); 
+          String filename = uuid + "." + extension[1];
+
+          UUID carpet = null;
+
+          if(o.orElseThrow().getUuid() == null){
+            carpet = uuid2;
+          }else{
+            carpet = o.orElseThrow().getUuid();
+          }
+          String url = s3Service.uploadFile(filename, carpet, "dev/users/", file);
+          userDb.setUrlImage(url);
+        }
+
+        userDb.setRoles(getRoles(user));
+        userDb.setFirstname(user.getFirstname());
+        userDb.setLastname(user.getLastname());
+        userDb.setUsername(user.getUsername());
+        userDb.setEmail(user.getEmail());
+        userDb.setRut(user.getRut());
+        userDb.setIdentificator(user.getIdentificator());
+        userDb.setBirthday(user.getBirthday());
+        userDb.setAddress(user.getAddress());
+        userOptional = userRepository.save(userDb);
+      }
+      return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return null;
     }
-    return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
   }
 
   @Override
