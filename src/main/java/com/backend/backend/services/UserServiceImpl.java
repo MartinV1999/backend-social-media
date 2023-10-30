@@ -23,6 +23,8 @@ import com.backend.backend.models.entities.request.UserRequest;
 import com.backend.backend.repositories.RoleRepository;
 import com.backend.backend.repositories.UserRepository;
 
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -88,15 +90,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<UserDto> update(UserRequest user, Long id, MultipartFile file) {
+  public Optional<UserDto> update(UserRequest user, Long id, MultipartFile file, Boolean deleteFile) {
     Optional<User> o = userRepository.findById(id);
     Optional<User> os = userRepository.getUserCompareDifferentId(id, user.getEmail());
     User userOptional = null;
     try {
+      User userDb = o.orElseThrow();
       if(o.isPresent() && !os.isPresent()){
-        User userDb = o.orElseThrow();
-        
-        if(file != null){
+        // || (file != null && o.orElseThrow().getUuid() != null)
+        if(file != null ){
           UUID uuid = UUID.randomUUID();
           UUID uuid2 = UUID.randomUUID();
           String[] extension = file.getOriginalFilename().split("\\."); 
@@ -110,20 +112,35 @@ public class UserServiceImpl implements UserService {
             carpet = o.orElseThrow().getUuid();
           }
           String url = s3Service.uploadFile(filename, carpet, "dev/users/", file);
-          userDb.setUrlImage(url);
-        }
 
-        userDb.setRoles(getRoles(user));
-        userDb.setFirstname(user.getFirstname());
-        userDb.setLastname(user.getLastname());
-        userDb.setUsername(user.getUsername());
-        userDb.setEmail(user.getEmail());
-        userDb.setRut(user.getRut());
-        userDb.setIdentificator(user.getIdentificator());
-        userDb.setBirthday(user.getBirthday());
-        userDb.setAddress(user.getAddress());
-        userOptional = userRepository.save(userDb);
+          if(deleteFile){
+            s3Service.deleteFile("dev/users/",  o.orElseThrow().getFilename() , o.orElseThrow().getUuid() );
+          }
+
+          userDb.setUrlImage(url);
+          userDb.setFilename(filename);
+          userDb.setUuid(carpet);
+        }
       }
+
+      if(file == null && deleteFile){
+        s3Service.deleteFile("dev/users/",  o.orElseThrow().getFilename() , o.orElseThrow().getUuid() );
+        userDb.setUrlImage(null);
+        userDb.setFilename(null);
+        userDb.setUuid(null);
+      }
+      userDb.setRoles(getRoles(user));
+      userDb.setFirstname(user.getFirstname());
+      userDb.setLastname(user.getLastname());
+      userDb.setUsername(user.getUsername());
+      userDb.setEmail(user.getEmail());
+      userDb.setRut(user.getRut());
+      userDb.setIdentificator(user.getIdentificator());
+      userDb.setBirthday(user.getBirthday());
+      userDb.setAddress(user.getAddress());
+      userDb.setIsComplete(true);
+      userOptional = userRepository.save(userDb);
+      
       return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
     } catch (Exception e) {
       System.out.println(e.getMessage());

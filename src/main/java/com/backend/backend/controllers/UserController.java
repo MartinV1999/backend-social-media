@@ -1,5 +1,6 @@
 package com.backend.backend.controllers;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +32,8 @@ import com.backend.backend.models.entities.dto.UserDto;
 import com.backend.backend.models.entities.request.UserRequest;
 import com.backend.backend.services.IS3Service;
 import com.backend.backend.services.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -64,8 +69,12 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestPart("user") User user, @RequestParam(value = "file", required = false) MultipartFile file){
+  public ResponseEntity<?> create(@Valid @RequestPart("user") User user, BindingResult result, @RequestParam(value = "file", required = false) MultipartFile file){
     
+    if(result.hasErrors()){
+      return validationHasErrors(result);
+    }
+
     try {
       Optional<User> o = userService.getUserByEmail(user.getEmail());
       UUID uuid = UUID.randomUUID();
@@ -76,6 +85,7 @@ public class UserController {
           String filename = uuid2 + "." + extension[1];
           String url = s3Service.uploadFile(filename, uuid, "dev/users/", file);
           user.setUrlImage(url);
+          user.setFilename(filename);
           user.setUuid(uuid);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
@@ -90,22 +100,32 @@ public class UserController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @RequestPart("user") UserRequest user, @RequestParam(value = "file", required = false) MultipartFile file){
-    Optional<UserDto> o = userService.update(user, id, file);
+  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestPart("user") UserRequest user, BindingResult result, @RequestParam(value = "file", required = false) MultipartFile file, @RequestParam(value = "DeleteFile", required = false) String deleteFile) throws IOException{
+
+    if(result.hasErrors()){
+      return validationHasErrors(result);
+    }
+    Optional<UserDto> o = userService.update(user, id, file, (deleteFile != null ? true : false));
     if(o.isPresent()){
       return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
     }
     return ResponseEntity.notFound().build();
   }
 
-  @PutMapping("/complete/{id}")
-  public ResponseEntity<?> updateGoogleUser(@PathVariable Long id, @RequestPart("user") UserRequest user, @RequestParam(value = "file", required = false) MultipartFile file){
-    Optional<UserDto> o = userService.update(user, id, file);
-    if(o.isPresent()){
-      return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
-    }
-    return ResponseEntity.notFound().build();
-  }
+  // @PutMapping("/completeAccount/{id}")
+  // public ResponseEntity<?> completeAccountData(@PathVariable Long id, @RequestPart("user") UserRequest user, @RequestParam(value = "file", required = false) MultipartFile file){
+    
+  //   Optional<User> op = userService.getUserById(id);
+  //   User userDb = op.orElseThrow();
+  //   user.setEmail(userDb.getEmail());
+  //   user.setUsername(userDb.getUsername());
+  //   user.setIsComplete(true);
+  //   Optional<UserDto> o = userService.update(user, id, file);
+  //   if(o.isPresent()){
+  //     return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
+  //   }
+  //   return ResponseEntity.notFound().build();
+  // }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> remove(@PathVariable Long id){
@@ -121,6 +141,14 @@ public class UserController {
   private ResponseEntity<?> validationNotDuplicateEmail(){
     Map<String, String> errors = new HashMap<>();
     errors.put("duplicate","El correo electronico esta en uso!");
+    return ResponseEntity.badRequest().body(errors);
+  }
+
+  private ResponseEntity<?> validationHasErrors(BindingResult result){
+    Map<String, String> errors = new HashMap<>();
+    for(FieldError error : result.getFieldErrors()){
+      errors.put(error.getField(),error.getDefaultMessage());
+    }
     return ResponseEntity.badRequest().body(errors);
   }
 

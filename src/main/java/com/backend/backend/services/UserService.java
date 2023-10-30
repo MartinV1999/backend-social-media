@@ -19,7 +19,7 @@ public interface UserService {
 
   UserDto save(User user);
 
-  Optional<UserDto> update(UserRequest user, Long id, MultipartFile File);
+  Optional<UserDto> update(UserRequest user, Long id, MultipartFile File, Boolean deleteFile);
 
   Optional<UserDto> findById(Long id);
 

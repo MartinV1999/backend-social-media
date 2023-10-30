@@ -19,6 +19,7 @@ public class UserRequest implements IUser {
   private String password;
   private boolean admin;
   private UUID uuid;
+  private Boolean isComplete;
 
   //private List<Role> roles;
 
@@ -110,5 +111,15 @@ public class UserRequest implements IUser {
   public void setUuid(UUID uuid) {
     this.uuid = uuid;
   }
+
+  public Boolean getIsComplete() {
+    return isComplete;
+  }
+
+  public void setIsComplete(Boolean isComplete) {
+    this.isComplete = isComplete;
+  }
+
+  
   
 }

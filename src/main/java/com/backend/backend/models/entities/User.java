@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -52,6 +53,7 @@ public class User implements IUser {
   @NotEmpty
   private String identificator;
 
+  // @NotBlank
   private Date birthday;
 
   @NotEmpty
@@ -83,8 +85,10 @@ public class User implements IUser {
   private Boolean isComplete;
 
   private UUID uuid;
+  
+  private String filename;
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
     name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"),
@@ -239,6 +243,14 @@ public class User implements IUser {
 
   public void setIsComplete(Boolean isComplete) {
     this.isComplete = isComplete;
+  }
+
+  public String getFilename() {
+    return filename;
+  }
+
+  public void setFilename(String filename) {
+    this.filename = filename;
   }
 
 }

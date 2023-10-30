@@ -40,8 +40,6 @@ public class JpaUserDetailsService implements UserDetailsService {
     .map(r -> new SimpleGrantedAuthority(r.getName()))
     .collect(Collectors.toList());
 
-    System.out.println(user.getPassword());
-
     return new User(user.getEmail(), user.getPassword(),true,true,true,true,authorities);
 
   }

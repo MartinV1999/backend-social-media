@@ -1,5 +1,6 @@
   package com.backend.backend.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,6 +84,7 @@ public class PostController {
         post.setUuid(uuid);
 
         if(file != null){
+          postPictures = createPictures(uuid, post, file);
           for (MultipartFile multipartFile : file) {
             UUID namefile = UUID.randomUUID();
             PostPictures postPicture = new PostPictures();
@@ -167,6 +169,27 @@ public class PostController {
     }
 
     return ResponseEntity.notFound().build();
+  }
+
+  private List<PostPictures> createPictures(UUID uuid, Post post ,List<MultipartFile> file) throws IOException{
+    List<PostPictures> postPictures = new ArrayList<>();
+    for (MultipartFile multipartFile : file) {
+      UUID nameFile = UUID.randomUUID();
+      PostPictures postPicture = new PostPictures();
+      String originalFileName = multipartFile.getOriginalFilename();
+      String[] extensions = null;
+      if(originalFileName != null){
+        extensions = multipartFile.getOriginalFilename().split("\\."); 
+      }
+      String filename = nameFile + "." + extensions[1];
+
+      String url = s3Service.uploadFile(filename, uuid, "dev/posts/", multipartFile);
+      postPicture.setPost(post);
+      postPicture.setUrl(url);
+      postPicture.setFilename(filename);
+      postPictures.add(postPicture);
+    }
+    return postPictures;
   }
 
   private ResponseEntity<?> validation(BindingResult result) {
