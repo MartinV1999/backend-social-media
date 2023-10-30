@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.backend.models.entities.User;
 import com.backend.backend.models.entities.dto.UserDto;
@@ -18,7 +19,7 @@ public interface UserService {
 
   UserDto save(User user);
 
-  Optional<UserDto> update(UserRequest user, Long id);
+  Optional<UserDto> update(UserRequest user, Long id, MultipartFile File, Boolean deleteFile);
 
   Optional<UserDto> findById(Long id);
 

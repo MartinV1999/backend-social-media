@@ -14,6 +14,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.backend.backend.models.entities.User;
+import com.backend.backend.models.entities.dto.UserDto;
+import com.backend.backend.models.entities.dto.mapper.DtoMapperUser;
 import com.backend.backend.repositories.UserRepository;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -66,8 +68,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       Authentication authResult) throws IOException, ServletException {
     String username = ((org.springframework.security.core.userdetails.User ) authResult.getPrincipal()).getUsername();
     
-    Long userId = userRepository.getUserId(username);
-    String photo = userRepository.getUserByEmail(username).orElseThrow().getUrlImage();
+    // Long userId = userRepository.getUserId(username);
+    User user = userRepository.getUserByEmail(username).orElseThrow();
+    UserDto userDto = DtoMapperUser.builder().setUser(user).build();
+    String photo = user.getUrlImage();
+    Long userId = user.getId();
     Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
     boolean isAdmin = roles.stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"));
@@ -87,7 +92,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     Map<String,Object> body = new HashMap<>();
     body.put("token", token);
     body.put("message", String.format("Hola %s, has iniciado sesion con exito", username));
-    body.put("username", username);
+    body.put("user", userDto);
     response.getWriter().write(new ObjectMapper().writeValueAsString(body));
     response.setStatus(200);
     response.setContentType("application/json");

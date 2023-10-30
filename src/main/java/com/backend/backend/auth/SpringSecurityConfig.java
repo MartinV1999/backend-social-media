@@ -48,9 +48,8 @@ public class SpringSecurityConfig {
     return http.authorizeHttpRequests(authRules -> authRules
       //USERS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/users","/users/{id}", "/users/page/{page}").permitAll()
-      .requestMatchers(HttpMethod.POST, "/users/account").permitAll()
-      .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("USER","ADMIN")
-      .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("USER","ADMIN")
+      .requestMatchers(HttpMethod.POST, "/users","/users/account").permitAll()      
+      .requestMatchers(HttpMethod.PUT, "/users/completeAccount/{id}","/users","/users/{id}").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasAnyRole("ADMIN")
       //POSTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/posts", "/posts/{id}").permitAll()
@@ -62,7 +61,7 @@ public class SpringSecurityConfig {
       .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER","ADMIN")
 
       //AUTH ENDPOINTS
-      .requestMatchers(HttpMethod.POST, "/auth","/auth/test").permitAll()
+      .requestMatchers(HttpMethod.POST, "/auth").permitAll()
 
       .anyRequest().authenticated())
       .csrf(config -> config.disable())
@@ -76,7 +75,7 @@ public class SpringSecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource(){
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+    config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
     config.setAllowedOriginPatterns(Arrays.asList("*"));
     config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
     config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));

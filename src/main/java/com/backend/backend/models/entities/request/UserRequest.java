@@ -1,6 +1,7 @@
 package com.backend.backend.models.entities.request;
 
 import java.sql.Date;
+import java.util.UUID;
 
 import com.backend.backend.models.entities.IUser;
 
@@ -17,6 +18,8 @@ public class UserRequest implements IUser {
   private String address;
   private String password;
   private boolean admin;
+  private UUID uuid;
+  private Boolean isComplete;
 
   //private List<Role> roles;
 
@@ -101,6 +104,22 @@ public class UserRequest implements IUser {
     this.password = password;
   }
 
+  public UUID getUuid() {
+    return uuid;
+  }
 
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
+
+  public Boolean getIsComplete() {
+    return isComplete;
+  }
+
+  public void setIsComplete(Boolean isComplete) {
+    this.isComplete = isComplete;
+  }
+
+  
   
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,22 +41,17 @@ import io.jsonwebtoken.Jwts;
 @RequestMapping("/auth")
 public class AuthController {
 
+  @Value("${google.clientId1}")
+  private String clientId1;
+
+  @Value("${google.clientId2}")
+  private String clientId2;
+
   @Autowired
   private UserService userService;
 
   @Autowired
   private ProviderAccountService accountService;
-
-  @PostMapping("/test")
-  public ResponseEntity<?> GoogleAuthTest(@RequestBody UserGoogleRequest account){
-    if(validateGoogleToken(account.getIdOAuthToken())){
-      System.out.println("Valido");
-      return ResponseEntity.ok().build();
-    }else{
-      System.out.println("Invalido");
-      return ResponseEntity.badRequest().build();
-    }
-  }
 
   @PostMapping()
   public Map<String,Object> auth(@RequestBody UserGoogleRequest account){
@@ -76,13 +71,14 @@ public class AuthController {
         user.setUsername(userOptional.orElseThrow().getUsername());
         user.setUrlImage(userOptional.orElseThrow().getUrlImage());
         user.setIsActive(0);
+        user.setIsComplete(false);
         
         ac.setEmail(account.getEmail());
         ac.setName(account.getDisplayName());
         ac.setProvider("Google");
         ac.setUser(user);
         accountService.save(ac);
-        return generateToken(account.getEmail(), account.getPicture(), user.getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), user.getId(),false, false);
       } else if (u.isPresent() && !p.isPresent()){
         Optional<User> userOptional = userService.getUserByEmail(account.getEmail());
         ac.setEmail(account.getEmail());
@@ -90,9 +86,9 @@ public class AuthController {
         ac.setProvider("Google");
         ac.setUser(userOptional.orElseThrow());
         accountService.save(ac);
-        return generateToken(account.getEmail(), account.getPicture(), userOptional.orElseThrow().getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), userOptional.orElseThrow().getId(),false, userOptional.orElseThrow().getIsComplete());
       }else if (p.isPresent() && u.isPresent()) {
-        return generateToken(account.getEmail(), account.getPicture(), u.orElseThrow().getId(),false);
+        return generateToken(account.getEmail(), account.getPicture(), u.orElseThrow().getId(),false, u.orElseThrow().getIsComplete());
       }
     }else{
       return null;
@@ -110,10 +106,7 @@ public class AuthController {
       // Specify the CLIENT_ID of the app that accesses the backend:
       // .setAudience(Collections.singletonList("161955849471-bguqectccp35mjt0lmba3k3bko5bd2ur.apps.googleusercontent.com"))
       // Or, if multiple clients access the backend:
-      .setAudience(Arrays.asList(
-        "161955849471-f6gbmsebsd4q9m9700o8v5ni06gagpr4.apps.googleusercontent.com",
-        "161955849471-bguqectccp35mjt0lmba3k3bko5bd2ur.apps.googleusercontent.com"
-      ))
+      .setAudience(Arrays.asList(clientId1, clientId2))
       .build();
 
       // (Receive idTokenString by HTTPS POST)
@@ -131,7 +124,7 @@ public class AuthController {
     }
   }
 
-  private Map<String,Object> generateToken(String email, String photo, Long userId, boolean isAdmin){
+  private Map<String,Object> generateToken(String email, String photo, Long userId, boolean isAdmin, boolean isComplete){
     Claims claims = Jwts.claims();
     
     ObjectMapper objectMapper = new ObjectMapper();
@@ -146,6 +139,7 @@ public class AuthController {
     claims.put("isAdmin", isAdmin);
     claims.put("userId", userId);
     claims.put("photo", photo);
+    claims.put("isComplete", isComplete);
 
     String token = Jwts.builder()
       .setClaims(claims)

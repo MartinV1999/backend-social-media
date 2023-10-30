@@ -3,11 +3,13 @@ package com.backend.backend.models.entities;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,6 +53,7 @@ public class User implements IUser {
   @NotEmpty
   private String identificator;
 
+  // @NotBlank
   private Date birthday;
 
   @NotEmpty
@@ -79,7 +82,13 @@ public class User implements IUser {
   @OneToMany
   private List<Post> posts;
 
-  @ManyToMany
+  private Boolean isComplete;
+
+  private UUID uuid;
+  
+  private String filename;
+
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
     name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"),
@@ -92,6 +101,7 @@ public class User implements IUser {
   private void prePersist(){
     createAt = new Date();
     isActive = 0;
+    isComplete = false;
   }
 
   public User() {
@@ -217,6 +227,30 @@ public class User implements IUser {
 
   public void setUrlImage(String urlImage) {
     this.urlImage = urlImage;
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
+
+  public Boolean getIsComplete() {
+    return isComplete;
+  }
+
+  public void setIsComplete(Boolean isComplete) {
+    this.isComplete = isComplete;
+  }
+
+  public String getFilename() {
+    return filename;
+  }
+
+  public void setFilename(String filename) {
+    this.filename = filename;
   }
 
 }

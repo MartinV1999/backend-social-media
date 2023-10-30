@@ -2,6 +2,7 @@ package com.backend.backend.models.entities.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.backend.backend.models.entities.Role;
 
@@ -19,13 +20,15 @@ public class UserDto {
   private Integer isActive;
   private List<Role> roles;
   private String urlImage;
+  private Boolean isComplete;
+  private UUID uuid;
   
   public UserDto(){
 
   }
   
   public UserDto(Long id, String firstname, String lastname, String username, String email, String rut,
-    String identificator, Date birthday, String address, boolean admin, Integer isActive, List<Role> roles, String urlImage) {
+    String identificator, Date birthday, String address, boolean admin, Integer isActive, List<Role> roles, String urlImage, Boolean isComplete, UUID uuid) {
     this.id = id;
     this.firstname = firstname;
     this.lastname = lastname;
@@ -39,6 +42,8 @@ public class UserDto {
     this.isActive = isActive;
     this.roles = roles;
     this.urlImage = urlImage;
+    this.isComplete = isComplete;
+    this.uuid = uuid;
   }
 
   public Long getId() {
@@ -144,5 +149,23 @@ public class UserDto {
   public void setUrlImage(String urlImage) {
     this.urlImage = urlImage;
   }
+
+  public Boolean getIsComplete() {
+    return isComplete;
+  }
+
+  public void setIsComplete(Boolean isComplete) {
+    this.isComplete = isComplete;
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
+
+  
 
 }
