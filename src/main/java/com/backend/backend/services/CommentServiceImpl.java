@@ -5,14 +5,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.backend.models.entities.Comment;
 import com.backend.backend.models.entities.dto.CommentDto;
 import com.backend.backend.models.entities.dto.mapper.DtoMapperComment;
 import com.backend.backend.repositories.CommentRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -27,6 +28,13 @@ public class CommentServiceImpl implements CommentService {
       .stream()
       .map(c -> DtoMapperComment.builder().setComment(c).build())
       .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<CommentDto> findByPostId(Long id, Pageable pageable) {
+    Page<Comment> commentPage = commentRepository.getCommentsByPostId(id, pageable);
+    return commentPage.map(c -> DtoMapperComment.builder().setComment(c).build());
   }
 
   @Override

@@ -23,9 +23,6 @@ import com.backend.backend.models.entities.request.UserRequest;
 import com.backend.backend.repositories.RoleRepository;
 import com.backend.backend.repositories.UserRepository;
 
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
-
-
 @Service
 public class UserServiceImpl implements UserService {
 

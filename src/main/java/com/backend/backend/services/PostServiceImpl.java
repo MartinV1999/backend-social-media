@@ -5,7 +5,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.backend.models.entities.Post;
 import com.backend.backend.models.entities.dto.PostDto;
@@ -26,6 +29,20 @@ public class PostServiceImpl implements PostService {
       .stream()
       .map(p -> DtoMapperPost.builder().setPost(p).build())
       .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PostDto> findAll(Pageable pageable) {
+    Page<Post> postPage = postRepository.findAll(pageable);
+    return postPage.map(u -> DtoMapperPost.builder().setPost(u).build());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PostDto> findByQuery( String query, Pageable pageable) {
+    Page<Post> postPage = postRepository.findByQuery(query, pageable);
+    return postPage.map(u -> DtoMapperPost.builder().setPost(u).build());
   }
 
   @Override

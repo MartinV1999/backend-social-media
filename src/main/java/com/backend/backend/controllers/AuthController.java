@@ -10,8 +10,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,7 @@ import io.jsonwebtoken.Jwts;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(originPatterns = "*")
 public class AuthController {
 
   @Value("${google.clientId1}")
@@ -52,6 +55,24 @@ public class AuthController {
 
   @Autowired
   private ProviderAccountService accountService;
+
+  @PostMapping("/checktoken")
+  public ResponseEntity<?> checkToken(@RequestBody() String token) {
+    try {
+      if (token != null) {
+        token = token.substring(7); // Elimina el prefij
+        Claims claims = Jwts.parserBuilder()
+          .setSigningKey(SECRET_KEY)
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
+        return ResponseEntity.ok().body(true); // El token es válido
+      }
+      return ResponseEntity.badRequest().body(false); // El token es inválido o ha caducado
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(false); // El token es inválido o ha caducado
+    }
+  }
 
   @PostMapping()
   public Map<String,Object> auth(@RequestBody UserGoogleRequest account){

@@ -37,7 +37,8 @@ public class DtoMapperComment {
     return new CommentDto(
       this.comment.getId(),
       commentUser,
-      this.comment.getContent() 
+      this.comment.getContent(),
+      this.comment.getCreatedAt()
     );
   }
 }

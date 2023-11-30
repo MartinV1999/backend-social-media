@@ -1,4 +1,4 @@
-  package com.backend.backend.controllers;
+package com.backend.backend.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -49,9 +52,16 @@ public class PostController {
   @Autowired
   private IS3Service s3Service;
 
-  @GetMapping
-  public List<PostDto> list(){
-    return postService.findAll();
+  @GetMapping("/page/{page}")
+  public Page<PostDto> list(@PathVariable Integer page){
+    Pageable pageable = PageRequest.of(page, 5);
+    return postService.findAll(pageable);
+  }
+
+  @GetMapping("/page/{page}/{query}")
+  public Page<PostDto> search(@PathVariable Integer page, @PathVariable String query){
+    Pageable pageable = PageRequest.of(page, 5);
+    return postService.findByQuery(query, pageable);
   }
 
   @GetMapping("/{id}")
@@ -64,7 +74,7 @@ public class PostController {
     }
   }
 
-  @PostMapping //@Valid @RequestBody CrearPostRequest postRequest, BindingResult result, 
+  @PostMapping
   public ResponseEntity<?> create(@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value= "file", required = false) List<MultipartFile> file){
     
     UUID uuid = UUID.randomUUID();
@@ -85,22 +95,6 @@ public class PostController {
 
         if(file != null){
           postPictures = createPictures(uuid, post, file);
-          for (MultipartFile multipartFile : file) {
-            UUID namefile = UUID.randomUUID();
-            PostPictures postPicture = new PostPictures();
-            String originalFileName = multipartFile.getOriginalFilename();
-            String[] extensions = null;
-            if(originalFileName != null){
-              extensions = multipartFile.getOriginalFilename().split("\\."); 
-            }
-            String filename = namefile + "." + extensions[1];
-
-            String url = s3Service.uploadFile(filename,uuid, "dev/posts/", multipartFile);
-            postPicture.setPost(post);
-            postPicture.setUrl(url);
-            postPicture.setFilename(filename);
-            postPictures.add(postPicture);
-          }
         }
 
         post.setImages(postPictures);
@@ -115,7 +109,7 @@ public class PostController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @RequestParam("uuid") UUID uuid, @RequestParam("DeleteFiles") String[] deleteFiles ,@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value = "file", required = false) List<MultipartFile> file){
+  public ResponseEntity<?> update(@PathVariable Long id, @RequestParam("uuid") UUID uuid, @RequestParam(value = "DeleteFiles" , required = false) String[] deleteFiles ,@RequestParam("userId") Long userId, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam(value = "file", required = false) List<MultipartFile> file){
 
     Post post = new Post();
     List<PostPictures> postPictures = new ArrayList<>();
@@ -127,7 +121,7 @@ public class PostController {
         post.setUser(user.orElseThrow());
       }
 
-      if(deleteFiles.length > 0){
+      if(deleteFiles != null && deleteFiles.length > 0){
         for(String filename : deleteFiles){
           Boolean isDelete = s3Service.deleteFile("dev/posts/", filename, uuid);
           if(isDelete){
@@ -137,22 +131,23 @@ public class PostController {
       }
       
       if(file != null){
-        for (MultipartFile multipartFile : file) {
-          UUID nameFile = UUID.randomUUID();
-          PostPictures postPicture = new PostPictures();
-          String originalFileName = multipartFile.getOriginalFilename();
-          String[] extensions = null;
-          if(originalFileName != null){
-            extensions = multipartFile.getOriginalFilename().split("\\."); 
-          }
-          String filename = nameFile + "." + extensions[1];
+        postPictures = createPictures(uuid, post, file);
+        // for (MultipartFile multipartFile : file) {
+        //   UUID nameFile = UUID.randomUUID();
+        //   PostPictures postPicture = new PostPictures();
+        //   String originalFileName = multipartFile.getOriginalFilename();
+        //   String[] extensions = null;
+        //   if(originalFileName != null){
+        //     extensions = multipartFile.getOriginalFilename().split("\\."); 
+        //   }
+        //   String filename = nameFile + "." + extensions[1];
 
-          String url = s3Service.uploadFile(filename, uuid, "dev/posts/", multipartFile);
-          postPicture.setPost(post);
-          postPicture.setUrl(url);
-          postPicture.setFilename(filename);
-          postPictures.add(postPicture);
-        }
+        //   String url = s3Service.uploadFile(filename, uuid, "dev/posts/", multipartFile);
+        //   postPicture.setPost(post);
+        //   postPicture.setUrl(url);
+        //   postPicture.setFilename(filename);
+        //   postPictures.add(postPicture);
+        // }
       }
       
       post.setId(id);
@@ -177,13 +172,15 @@ public class PostController {
       UUID nameFile = UUID.randomUUID();
       PostPictures postPicture = new PostPictures();
       String originalFileName = multipartFile.getOriginalFilename();
-      String[] extensions = null;
+      String[] extensions = {};
       if(originalFileName != null){
         extensions = multipartFile.getOriginalFilename().split("\\."); 
       }
+
       String filename = nameFile + "." + extensions[1];
 
       String url = s3Service.uploadFile(filename, uuid, "dev/posts/", multipartFile);
+
       postPicture.setPost(post);
       postPicture.setUrl(url);
       postPicture.setFilename(filename);

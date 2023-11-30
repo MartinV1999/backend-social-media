@@ -10,17 +10,17 @@ public class PostDto {
   private List<PostPicturesDto> postPictures;
   private String description;
   private Integer votes;
-  private List<CommentDto> comments;
+  // private List<CommentDto> comments;
   private UUID uuid;
   
-  public PostDto(Long id, String title, UserPostDto user, List<PostPicturesDto> postPictures, String description, Integer votes, List<CommentDto> comments, UUID uuid) {
+  public PostDto(Long id, String title, UserPostDto user, List<PostPicturesDto> postPictures, String description, Integer votes, UUID uuid) {
     this.id = id;
     this.title = title;
     this.user = user;
     this.postPictures = postPictures;
     this.description = description;
     this.votes = votes;
-    this.comments = comments;
+    // this.comments = comments;
     this.uuid = uuid;
   }
 
@@ -40,13 +40,13 @@ public class PostDto {
     this.user = user;
   }
 
-  public List<CommentDto> getComments() {
-    return comments;
-  }
+  // public List<CommentDto> getComments() {
+  //   return comments;
+  // }
 
-  public void setComments(List<CommentDto> comments) {
-    this.comments = comments;
-  }
+  // public void setComments(List<CommentDto> comments) {
+  //   this.comments = comments;
+  // }
 
 
   public String getDescription() {

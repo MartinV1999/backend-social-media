@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.backend.backend.models.entities.Post;
-import com.backend.backend.models.entities.dto.CommentDto;
 import com.backend.backend.models.entities.dto.PostDto;
 import com.backend.backend.models.entities.dto.PostPicturesDto;
 import com.backend.backend.models.entities.dto.UserPostDto;
@@ -29,9 +28,9 @@ public class DtoMapperPost {
     if(post == null){
       throw new RuntimeException("Debe pasar el entity post!");
     }
-      List<CommentDto> comments = this.post.getComments().stream()
-        .map(c -> DtoMapperComment.builder().setComment(c).build())
-        .collect(Collectors.toList());
+      // List<CommentDto> comments = this.post.getComments().stream()
+      //   .map(c -> DtoMapperComment.builder().setComment(c).build())
+      //   .collect(Collectors.toList());
 
       List<PostPicturesDto> postPictures = this.post.getImages().stream()
         .map(i -> DtoMapperPostPictures.builder().setPostPictures(i).build())
@@ -51,7 +50,7 @@ public class DtoMapperPost {
       postPictures, 
       this.post.getDescription(), 
       this.post.getVotes(),
-      comments,
+      // comments,
       this.post.getUuid()
     );
   }
