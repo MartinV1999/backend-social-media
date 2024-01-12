@@ -23,5 +23,18 @@ public class RoleServiceImpl implements RoleService {
   public void save(String name) {
     roleRepository.save(name);
   }
+
+  // @Override
+  // public boolean getAdmin(Long userId) {
+  //   try {
+  //     Optional<User> op = userRepository.findById(userId);
+  //     if(!op.isPresent()){
+  //       throw new Exception ();
+  //     }
+  //     return roleRepository.getAdmin(userId);
+  //   } catch (Exception e) {
+  //     return false;
+  //   }
+  // }
   
 }

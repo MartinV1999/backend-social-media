@@ -14,4 +14,7 @@ public interface RoleRepository extends CrudRepository<Role,Long> {
   @Modifying
   @Query("INSERT INTO Role (name) VALUES (?1)")
   void save(String name);
+
+  // @Query("SELECT r FROM User u , Role r WHERE u.id = r.id AND u.id = ?1 AND ur.role_id = 2")
+  // boolean getAdmin(Long userId);
 }

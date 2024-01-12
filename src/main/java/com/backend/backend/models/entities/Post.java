@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -44,6 +45,7 @@ public class Post implements Serializable {
   private List<PostPictures> images;
 
   @NotEmpty
+  @Column(length = 2000)
   private String description;
 
   @NotNull

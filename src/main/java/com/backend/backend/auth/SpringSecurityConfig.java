@@ -48,6 +48,7 @@ public class SpringSecurityConfig {
     return http.authorizeHttpRequests(authRules -> authRules
     
       //USERS ENDPOINTS
+      .requestMatchers(HttpMethod.GET, "/users/checkToken").permitAll()
       .requestMatchers(HttpMethod.GET, "/users","/users/{id}", "/users/page/{page}").hasRole("ADMIN")
       .requestMatchers(HttpMethod.POST, "/users","/users/account").permitAll()      
       .requestMatchers(HttpMethod.PUT, "/users","/users/{id}").hasAnyRole("USER","ADMIN")
@@ -55,7 +56,7 @@ public class SpringSecurityConfig {
       //POSTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/posts", "/posts/{id}", "/posts/page/{page}", "/posts/page/{page}/{query}").permitAll()
       .requestMatchers(HttpMethod.POST, "/posts").hasAnyRole("USER","ADMIN")
-      .requestMatchers(HttpMethod.PUT, "/posts").hasAnyRole("USER","ADMIN")
+      .requestMatchers(HttpMethod.PUT, "/posts","/posts/{id}").hasAnyRole("USER","ADMIN")
       .requestMatchers(HttpMethod.DELETE, "/posts").hasAnyRole("USER","ADMIN")
       //COMMENTS ENDPOINTS
       .requestMatchers(HttpMethod.GET, "/comments", "/comments/page/{page}/{id}").permitAll()
