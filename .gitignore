@@ -5,6 +5,10 @@ target/
 !**/src/test/**/target/
 !**/src/main/resources/application.properties
 
+### Docker ###
+docker-compose.yml
+dockerfile
+
 ### STS ###
 .apt_generated
 .classpath
